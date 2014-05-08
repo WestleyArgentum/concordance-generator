@@ -11,7 +11,7 @@ function concordance(content::String)
 
     concordance_data = Concordance()
     for s in 1:length(sentences)
-        sentence = sentences[s]
+        sentence = rstrip(sentences[s])
 
         # Strip trailing punctuation - to make it easier to parse words
         # To make this more concise, I've submitted a pull request here:
