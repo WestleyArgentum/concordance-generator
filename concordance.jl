@@ -28,6 +28,7 @@ function concordance(content::String)
         # validation could be done here (checking against a dictionary, etc)
         words = eachmatch(r"\w[\'\w.-]*", sentence)
         for word in words
+            # record the sentence number where this word was found
             push!(get!(concordance_data, lowercase(word.match), Int[]), s)
         end
     end
