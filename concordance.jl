@@ -11,25 +11,12 @@ function concordance(content::String)
 
     concordance_data = Concordance()
     for s in 1:length(sentences)
-        sentence = rstrip(sentences[s])
+        sentence = normalize_sentence(sentences[s])
+        words = split_words(sentence)
 
-        # Strip trailing punctuation - to make it easier to parse words
-        # To make this more concise, I've submitted a pull request here:
-        # https://github.com/JuliaLang/julia/pull/6779
-        if endswith(sentence, '.') ||
-           endswith(sentence, '?') ||
-           endswith(sentence, '!')
-
-            sentence = chop(sentence)
-        end
-
-        # As with parsing sentences (see below), regular expressions may not
-        # be the perfect tool for parsing words. Potentially some more
-        # validation could be done here (checking against a dictionary, etc)
-        words = eachmatch(r"\w[\'\w.-]*", sentence)
         for word in words
             # record the sentence number where this word was found
-            push!(get!(concordance_data, lowercase(word.match), Int[]), s)
+            push!(get!(concordance_data, normalize_word(word.match), Int[]), s)
         end
     end
 
@@ -41,6 +28,22 @@ function split_sentences(sentences)
     # are far from my favorite tools, however, they're more approachable than
     # hand-rolled parsing code and more concise than possible NLP solutions.
     split(sentences, r"((?<=[a-z0-9\)][.?!])|(?<=[a-z0-9][.?!]\"))(\s|\r\n)(?=\"?[A-Z])")
+end
+
+function normalize_sentence(sentence)
+    sentence = rstrip(sentence)
+    endswith(sentence, ['.','?','!']) ? chop(sentence) : sentence
+end
+
+function split_words(sentence)
+    # As with parsing sentences (see above), regular expressions may not
+    # be the perfect tool for parsing words. Potentially some more
+    # validation could be done here (checking against a dictionary, etc)
+    collect(eachmatch(r"\w[\'\w.-]*", sentence))
+end
+
+function normalize_word(word)
+    lowercase(word)
 end
 
 # `show(concordance)` will do some pretty printing to make the concordance
